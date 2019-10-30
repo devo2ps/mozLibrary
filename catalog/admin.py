@@ -15,6 +15,7 @@ admin.site.register(Genre)
 class BookInline(admin.TabularInline):
     model = Book
 
+    #prevents a pile of empty forms
     def get_extra(self, request, obj=None, **kwargs):
         extra = 0
         return extra
@@ -32,6 +33,9 @@ admin.site.register(Author, AuthorAdmin)
 
 class BooksInstanceInline(admin.TabularInline):
     model = BookInstance
+    def get_extra(self, request, obj=None, **kwargs):
+        extra = 0
+        return extra    
 
 # Register the Admin classes for Book using the decorator
 @admin.register(Book)
