@@ -14,4 +14,6 @@
      <li><strong>Number of Titles with On:</strong> {{ title_filt}}</li>
     <li><strong>Number of Genres with On:</strong> {{genre_filt}}</li>
   </ul>
+  <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
+
 {% endblock %}
