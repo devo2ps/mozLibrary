@@ -29,14 +29,7 @@ def index(request):
     genre_filt = Genre.objects.filter(name__contains='on').count()
 
 
-    context = {
-        'num_books': num_books,
-        'num_instances': num_instances,
-        'num_instances_available': num_instances_available,
-        'num_authors': num_authors,
-        'title_filt': title_filt,
-        'genre_filt': genre_filt
-    }
+
 
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 0)
@@ -48,6 +41,8 @@ def index(request):
         'num_instances_available': num_instances_available,
         'num_authors': num_authors,
         'num_visits': num_visits,
+        'title_filt': title_filt,
+        'genre_filt': genre_filt,
     }
     
 
@@ -138,3 +133,17 @@ class AuthorListView(generic.ListView):
 class AuthorDetailView(generic.DetailView):
     model = Author
 
+#librarian view
+
+#from django.contrib.auth.mixins import PermissionRequiredMixin
+
+
+class LoanedBooksLibrarianListView(LoginRequiredMixin,generic.ListView):
+    """Generic class-based view listing books on loan to current user."""
+    model = BookInstance
+    permission_required = 'catalog.can_mark_returned'
+    template_name ='catalog/bookinstance_list_all_borrowed.html'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        return BookInstance.objects.filter(status__exact='o').order_by('due_back')
