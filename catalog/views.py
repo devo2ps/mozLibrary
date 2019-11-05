@@ -3,12 +3,18 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import permission_required
 from django.views import generic
 from catalog.models import Book, Author, BookInstance, Genre
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from catalog.forms import RenewBookForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-
 from catalog.models import Author
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+import datetime
+
+
+
 
 def index(request):
     """View function for home page of site."""
@@ -108,19 +114,21 @@ def renew_book_librarian(request, pk):
     return render(request, 'catalog/book_renew_librarian.html', context)
 
 
-class AuthorCreate(CreateView):
+class AuthorCreate(PermissionRequiredMixin,CreateView):
     model = Author
     fields = '__all__'
     initial = {'date_of_death': '05/01/2018'}
+    permission_required = 'catalog.can_mark_returned'
 
-class AuthorUpdate(UpdateView):
+class AuthorUpdate(PermissionRequiredMixin,UpdateView):
     model = Author
     fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+    permission_required = 'catalog.can_mark_returned'
 
-class AuthorDelete(DeleteView):
+class AuthorDelete(PermissionRequiredMixin,DeleteView):
     model = Author
     success_url = reverse_lazy('authors')
-
+    permission_required = 'catalog.can_mark_returned'
 
 
 class AuthorListView(generic.ListView):
@@ -138,7 +146,7 @@ class AuthorDetailView(generic.DetailView):
 #from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
-class LoanedBooksLibrarianListView(LoginRequiredMixin,generic.ListView):
+class LoanedBooksLibrarianListView(PermissionRequiredMixin,generic.ListView):
     """Generic class-based view listing books on loan to current user."""
     model = BookInstance
     permission_required = 'catalog.can_mark_returned'
@@ -147,3 +155,21 @@ class LoanedBooksLibrarianListView(LoginRequiredMixin,generic.ListView):
     
     def get_queryset(self):
         return BookInstance.objects.filter(status__exact='o').order_by('due_back')
+
+
+class BookCreate(PermissionRequiredMixin,CreateView):
+    model = Book
+    fields = ['title','author','summary','genre','language']
+   
+    permission_required = 'catalog.can_mark_returned'
+
+class BookUpdate(PermissionRequiredMixin,UpdateView):
+    model = Book
+    fields = ['title','author','summary','genre','language'] #['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+    permission_required = 'catalog.can_mark_returned'
+
+class BookDelete(PermissionRequiredMixin,DeleteView):
+    model = Book
+    success_url = reverse_lazy('books')
+    permission_required = 'catalog.can_mark_returned'
+
